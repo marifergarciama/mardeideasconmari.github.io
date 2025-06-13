@@ -1,6 +1,1087 @@
-<html>
-  <head><title>title</title></head>
-  <body>
-    <h1>Sample</h1>
-  </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>+El Sargazo y su Aprovechamiento!</title>
+    <style>
+        /* Variables CSS para una gestión de colores más sencilla */
+        :root {
+            --primary-color: #336633; /* Verde oscuro para elementos principales como el jugador */
+            --secondary-color: #558844; /* Verde medio para bordes y bloques de sargazo */
+            --background-light: #eef9ee; /* Fondo muy claro */
+            --background-medium: #ccffcc; /* Fondo claro para áreas de juego y huecos */
+            --info-box-bg: #d4f0d4; /* Fondo para la caja de información */
+            --text-color: #334422; /* Color de texto general */
+            --border-radius-sm: 6px;
+            --border-radius-md: 8px;
+            --border-radius-lg: 10px;
+            --button-bg: #4CAF50; /* Color de fondo para botones */
+            --button-text: #ffffff; /* Color de texto para botones */
+            --button-hover-bg: #45a049; /* Color de fondo al pasar el ratón por los botones */
+
+            /* Colores específicos para estética mejorada */
+            --beach-sand: #fce8c4; /* Arena de playa */
+            --ocean-blue: #87ceeb; /* Azul cielo/océano claro */
+            --sargazo-brown: #8B4513; /* Marrón para sargazo recolectable */
+            --sargablock-color: #A0522D; /* Color del bloque de sargazo comprimido */
+            --house-wall-color: #deb887; /* Color de las paredes de la casa */
+            --house-roof-color: #a0522d; /* Color del techo de la casa */
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--background-light);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden; /* Evita el scroll horizontal */
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        main {
+            width: 100%;
+            max-width: 800px;
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sección de Información y Mensajes */
+        #info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-box {
+            background-color: var(--info-box-bg);
+            border: 2px solid var(--secondary-color);
+            border-radius: var(--border-radius-md);
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        #game-messages {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #game-counter {
+            color: var(--text-color);
+            font-style: italic;
+        }
+
+        /* Contenedor del Juego */
+        #game-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-top: 1px solid #eee;
+            text-align: center; /* Centra el contenido inicial y final */
+        }
+
+        /* Estilos para el botón de inicio/reinicio */
+        #startButton, #restartButton {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        #startButton:hover, #restartButton:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        /* --- Estilos Comunes para Bloques de Sargazo y Jugador (Actualizados) --- */
+        .sargablock {
+            background: var(--secondary-color);
+            border-radius: var(--border-radius-sm);
+        }
+
+        /* --- Nivel 1: Área de Juego y Jugador (Nuevos Estilos) --- */
+        #gameArea {
+            position: relative;
+            width: 100%; /* Adaptable */
+            max-width: 600px; /* Tamaño máximo para una playa más amplia */
+            height: 400px; /* Mayor altura para la playa */
+            border: 2px solid var(--secondary-color);
+            background: linear-gradient(to bottom, var(--ocean-blue) 0%, var(--ocean-blue) 50%, var(--beach-sand) 50%, var(--beach-sand) 100%); /* Simula océano y arena */
+            border-radius: var(--border-radius-md);
+            margin: 20px auto; /* Centrar el área de juego */
+            outline: none; /* Quitar el contorno de focus por defecto */
+            overflow: hidden; /* Asegura que las olas y sargazo no se salgan */
+        }
+
+        #gameArea:focus {
+            box-shadow: 0 0 0 3px rgba(85, 136, 68, 0.5); /* Resaltar al enfocar */
+        }
+
+        #player {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #6a0dad; /* Un color distintivo para el personaje (morado) */
+            border-radius: 50%; /* Forma de personita (círculo) */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.1s ease-out; /* Suaviza el movimiento */
+            z-index: 10; /* Para que esté por encima del sargazo */
+            background-image: url('https://via.placeholder.com/40x40/6a0dad/ffffff?text=🧍'); /* Placeholder de personita */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Animación de la personita para simular caminar */
+        @keyframes walk {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .player-walking {
+            animation: walk 0.5s infinite alternate;
+        }
+
+        /* Animación de las olas en el Nivel 1 */
+        .wave {
+            position: absolute;
+            bottom: 50%; /* Justo en el límite del océano y la arena */
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3); /* Color espuma de ola */
+            border-radius: 50%;
+            animation: waveFlow 3s infinite linear;
+            opacity: 0.7;
+            pointer-events: none; /* Para que no interfiera con el jugador */
+            transform: translateY(-50%);
+        }
+
+        @keyframes waveFlow {
+            0% { transform: translateX(0) scaleY(1) translateY(-50%); }
+            50% { transform: translateX(-20px) scaleY(1.1) translateY(-50%); }
+            100% { transform: translateX(0) scaleY(1) translateY(-50%); }
+        }
+
+        .sargablock-collectible { /* Bloques de sargazo en Nivel 1 */
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            background: var(--sargazo-brown); /* Color de sargazo más realista */
+            border-radius: 50%; /* Formas más orgánicas */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease-out, opacity 0.3s ease-out;
+            background-image: url('https://via.placeholder.com/30x30/8B4513/ffffff?text=🌱'); /* Icono de sargazo */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .sargablock-collectible.collected {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        /* --- Nivel 2: Bloque Arrastrable y Máquina (Nuevos Estilos) --- */
+        #level2-elements-container {
+            display: flex;
+            flex-direction: column; /* Stack elements vertically */
+            align-items: center; /* Center horizontally */
+            gap: 20px; /* Space between the sargazo blocks area and the machine */
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: var(--border-radius-md);
+            background-color: #f8f8f8;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #sargazoBlocksForProcessing { /* This will hold the 6 blocks for processing */
+            display: flex;
+            flex-wrap: wrap; /* Allow blocks to wrap to the next line */
+            gap: 15px; /* Space between individual blocks */
+            justify-content: center; /* Center blocks within their container */
+            align-items: flex-end; /* Align blocks to the bottom */
+            width: 100%; /* Take full width of its parent */
+            min-height: 120px; /* Ensure space for blocks */
+            padding: 10px;
+            border: 1px dashed #e0e0e0; /* Lighter border for this specific area */
+            border-radius: var(--border-radius-md);
+            background-color: #f0f0f0;
+            position: relative; /* For precise bottom alignment if needed */
+        }
+
+        .sargablock-draggable {
+            width: 50px;
+            height: 50px;
+            background: var(--sargazo-brown); /* El sargazo sin procesar es marrón */
+            border-radius: var(--border-radius-sm);
+            cursor: grab;
+            transition: transform 0.1s ease-in-out, background-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: url('https://via.placeholder.com/50x50/8B4513/ffffff?text=🌿'); /* Icono de sargazo para arrastrar */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .sargablock-draggable:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+        .sargablock-draggable:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        #machine {
+            position: relative; /* Para la animación de la prensa */
+            width: 180px; /* Más grande y robusta */
+            height: 180px;
+            border: 3px solid var(--primary-color);
+            border-radius: var(--border-radius-lg);
+            background: #d3d3d3; /* Color de metal */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease-in-out;
+            overflow: hidden; /* Para contener la animación */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        #machine:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        #machine::before { /* Elemento para simular la prensa */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: #696969; /* Color de la prensa */
+            border-bottom: 2px solid var(--primary-color);
+            transition: transform 0.3s ease-in-out;
+            transform-origin: top;
+        }
+
+        #machine.compressing::before {
+            animation: compress 0.6s ease-in-out forwards;
+        }
+
+        @keyframes compress {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(80px); /* Baja la prensa */ }
+            100% { transform: translateY(0); }
+        }
+
+        #newBlocksContainer {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px; /* Espacio entre bloques */
+            flex-wrap: wrap;
+            max-width: 400px;
+            min-height: 60px; /* Para que no colapse si no hay bloques */
+            border: 1px dashed #ccc;
+            padding: 10px;
+            border-radius: var(--border-radius-md);
+            background-color: #f8f8f8;
+            margin: 20px auto; /* Centrar el contenedor de nuevos bloques */
+            justify-content: center; /* Center processed blocks */
+        }
+
+        /* Estilo para los bloques de sargazo ya procesados (Nivel 2 y 3) */
+        .sargablock-processed {
+            width: 50px; /* Igual que el draggable original */
+            height: 50px;
+            background: var(--sargablock-color); /* Color tierra/marrón para el bloque final */
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-out;
+            background-image: url('https://via.placeholder.com/50x50/A0522D/ffffff?text=🧱'); /* Icono de ladrillo */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* --- Nivel 3: Construcción de la Casita (Nuevos Estilos) --- */
+        #blocksArea {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            border-radius: var(--border-radius-md);
+            background-color: #f8f8f8;
+            justify-content: center; /* Centrar los bloques arrastrables */
+        }
+
+        #house { /* El 'wall' ahora es una 'house' */
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            grid-template-rows: repeat(3, 70px); /* Más filas para una casita */
+            gap: 10px; /* Espacio entre bloques */
+            padding: 20px;
+            background: var(--background-medium); /* Fondo donde se construye la casa */
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            justify-content: center;
+            align-content: center;
+            width: fit-content;
+            margin: 0 auto;
+            border: none; /* Sin borde de la cuadrícula, la casa misma será el borde */
+            transition: all 0.5s ease-in-out;
+        }
+
+        /* Simulación de un techo para la casa */
+        #house.completed::before {
+            content: '';
+            position: absolute;
+            top: -30px; /* Elevar el techo */
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% + 40px); /* Más ancho que la casa */
+            height: 60px;
+            background-color: var(--house-roof-color);
+            border-radius: 10px 10px 0 0;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%); /* Forma triangular para el techo */
+            z-index: 1;
+            box-shadow: 0 -5px 10px rgba(0,0,0,0.2);
+            transition: all 0.5s ease-in-out 0.5s; /* Animación con retraso */
+        }
+        #house.completed::after { /* Chimenea */
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: calc(50% + 40px);
+            transform: translateX(-50%);
+            width: 20px;
+            height: 40px;
+            background-color: var(--house-roof-color);
+            border-radius: 5px 5px 0 0;
+            z-index: 2;
+            box-shadow: 0 -3px 8px rgba(0,0,0,0.2);
+            transition: all 0.5s ease-in-out 0.7s;
+        }
+
+
+        .hole {
+            width: 70px;
+            height: 70px;
+            border: 2px dashed #90ee90; /* Borde más claro para los huecos */
+            border-radius: var(--border-radius-sm);
+            background: #e6ffe6; /* Un tono más claro que el fondo para distinción */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease-in-out;
+            box-sizing: border-box;
+            background-image: url('https://via.placeholder.com/70x70/e6ffe6/90ee90?text=?'); /* Indicador de hueco */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hole:hover, .hole.drag-over { /* Estilo al arrastrar sobre un hueco */
+            background-color: #aaffaa;
+            transform: scale(1.02);
+        }
+
+        .hole:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Estilo para el bloque que se está arrastrando */
+        .dragging {
+            opacity: 0.7;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Estilos responsivos básicos */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            main {
+                padding: 15px;
+            }
+
+            #gameArea {
+                height: 250px;
+            }
+
+            #machine {
+                width: 120px;
+                height: 120px;
+            }
+
+            #house {
+                grid-template-columns: repeat(2, 60px);
+                grid-template-rows: repeat(3, 60px);
+                gap: 10px;
+            }
+
+            .hole, .sargablock-draggable {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>El Sargazo y su Aprovechamiento</h1>
+    </header>
+
+    <main>
+        <section id="info-section">
+            <div id="infoBox" class="info-box" aria-live="polite" tabindex="0">
+            </div>
+            <div id="game-messages" aria-live="polite"></div>
+            <div id="game-counter" aria-live="polite"></div>
+        </section>
+
+        <section id="game-container">
+        </section>
+    </main>
+
+    <script>
+        // Constantes para los IDs de los elementos
+             // Constantes para los IDs de los elementos
+             const ELEMENTS = {
+            INFO_BOX: 'infoBox',
+            GAME_MESSAGES: 'game-messages',
+            GAME_COUNTER: 'game-counter',
+            GAME_CONTAINER: 'game-container',
+            GAME_AREA_LVL1: 'gameArea',
+            PLAYER_LVL1: 'player',
+            MACHINE_LVL2: 'machine',
+            NEW_BLOCKS_CONTAINER_LVL2: 'newBlocksContainer',
+            SARGazo_BLOCKS_FOR_PROCESSING_LVL2: 'sargazoBlocksForProcessing', // New ID for Level 2 blocks container
+            BLOCKS_AREA_LVL3: 'blocksArea',
+            HOUSE_LVL3: 'house' 
+        };
+
+        // Referencias a elementos del DOM (se inicializan al cargar el script)
+        const infoBox = document.getElementById(ELEMENTS.INFO_BOX);
+        const gameMessages = document.getElementById(ELEMENTS.GAME_MESSAGES);
+        const gameCounter = document.getElementById(ELEMENTS.GAME_COUNTER);
+        const gameContainer = document.getElementById(ELEMENTS.GAME_CONTAINER);
+
+        // Configuraciones del juego
+        const GAME_CONFIG = {
+            MAX_BLOCKS_LEVEL1: 6,
+            MAX_BLOCKS_LEVEL2: 6, // Only 6 blocks for Level 2
+            PLAYER_SPEED: 10, // Velocidad de movimiento del jugador
+            LEVEL_TRANSITION_DELAY: 2000, // Milisegundos antes de pasar al siguiente nivel
+            WAVE_COUNT: 3 // Número de olas en Nivel 1
+        };
+
+        // Mensajes informativos para cada nivel, alineados con el objetivo del proyecto
+        const levelMessages = [
+            `Nivel 1: El exceso de sargazo en las playas está relacionado con el cambio climático, el aumento de nutrientes en el océano y el calentamiento global. Este sargazo al acumularse produce gases nocivos como metano y ácido sulfhídrico que dañan el medio ambiente y la salud.`,
+            `Nivel 2: Frente a esta problemática, investigaciones han buscado transformar el sargazo en una oportunidad. Se ha desarrollado el "sargablock", un bloque sostenible para construcción hecho con sargazo, que ayuda a reducir residuos contaminantes.`,
+            `Nivel 3: El uso del sargablock no solo aporta beneficios ambientales, sino también sociales y económicos, al generar empleos y promover la economía local, impulsando un desarrollo más sustentable para las comunidades afectadas.`
+        ];
+
+        /**
+         * Muestra el mensaje informativo del nivel actual en el infoBox.
+         * @param {number} levelIndex - El índice del nivel (0 para Nivel 1, 1 para Nivel 2, etc.).
+         */
+        function showLevelInfo(levelIndex) {
+            infoBox.textContent = levelMessages[levelIndex];
+            gameMessages.textContent = ''; // Limpiar mensajes de estado anteriores
+            gameCounter.textContent = ''; // Limpiar contador anterior
+            infoBox.focus(); // Enfocar el infoBox para accesibilidad
+        }
+
+        /**
+         * Muestra el mensaje de inicio del juego y un botón para comenzar.
+         */
+        function showStartScreen() {
+            infoBox.textContent = '¡Bienvenido! Aprende cómo el sargazo, un problema ambiental, puede convertirse en una solución sostenible.';
+            gameMessages.textContent = 'Presiona "Iniciar Juego" para comenzar tu aventura.';
+            gameCounter.textContent = '';
+            gameContainer.innerHTML = `
+                <button id="startButton">Iniciar Juego</button>
+            `;
+            document.getElementById('startButton').addEventListener('click', startLevel1);
+        }
+
+        /**
+         * Muestra el mensaje final del juego y un botón para reiniciar.
+         */
+        function showEndScreen() {
+            infoBox.textContent = '¡Felicidades! Has completado todos los niveles.';
+            gameMessages.textContent = 'Gracias por aprender sobre la importancia del aprovechamiento sostenible del sargazo y sus beneficios ambientales, sociales y económicos. ¡Eres un agente de cambio!';
+            gameCounter.textContent = '';
+            gameContainer.innerHTML = `
+                <button id="restartButton">Volver a Jugar</button>
+            `;
+            document.getElementById('restartButton').addEventListener('click', showStartScreen);
+        }
+
+        /**
+         * Clase para manejar la lógica del Nivel 1 (recolectar sargazo).
+         */
+        class Level1Game {
+            constructor() {
+                this.player = null;
+                this.blocks = [];
+                this.blocksCollected = 0;
+                this.posX = 0;
+                this.posY = 0;
+                this.gameArea = null;
+                this.animationFrameId = null;
+                this.keys = {}; // Para un movimiento más suave con múltiples teclas
+                this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+                this.boundHandleKeyUp = this.handleKeyUp.bind(this);
+                this.boundGameLoop = this.gameLoop.bind(this);
+            }
+
+            init() {
+                showLevelInfo(0);
+                gameContainer.innerHTML = `
+                    <p>Usa las teclas <b>W A S D</b> o las <b>flechas</b> para mover a la personita y recoger los cúmulos de sargazo (círculos marrones).</p>
+                    <div id="${ELEMENTS.GAME_AREA_LVL1}" tabindex="0" aria-label="Área de juego: una playa para recolectar sargazo">
+                        <div id="${ELEMENTS.PLAYER_LVL1}" aria-label="Jugador, la personita morada"></div>
+                    </div>
+                `;
+
+                this.gameArea = document.getElementById(ELEMENTS.GAME_AREA_LVL1);
+                this.player = document.getElementById(ELEMENTS.PLAYER_LVL1);
+
+                // Posicionar al jugador en la parte de la arena
+                this.posX = this.gameArea.clientWidth / 2 - this.player.clientWidth / 2;
+                this.posY = this.gameArea.clientHeight * 0.75; // 75% hacia abajo para estar en la arena
+                this.player.style.left = this.posX + 'px';
+                this.player.style.top = this.posY + 'px';
+
+                this.blocksCollected = 0; // Reiniciar contador para el nivel
+                this.createBlocks();
+                this.createWaves(); // Crear olas
+                this.updateCounter();
+
+                // Asegurarse de que el área de juego tenga foco para recibir eventos de teclado
+                this.gameArea.focus();
+
+                this.addEventListeners();
+                this.animationFrameId = requestAnimationFrame(this.boundGameLoop); // Iniciar el bucle de juego
+            }
+
+            createBlocks() {
+                // Limpiar bloques existentes antes de crear nuevos
+                this.blocks.forEach(block => block && block.remove());
+                this.blocks = [];
+
+                for (let i = 0; i < GAME_CONFIG.MAX_BLOCKS_LEVEL1; i++) {
+                    const block = document.createElement('div');
+                    block.className = 'sargablock-collectible';
+                    // Posicionamiento más robusto para evitar salir del área y asegurar que estén en la arena
+                    const minX = 0;
+                    const maxX = this.gameArea.clientWidth - 30; // 30 es el ancho del bloque
+                    const minY = this.gameArea.clientHeight * 0.55; // Asegura que estén en la arena
+                    const maxY = this.gameArea.clientHeight - 30;
+
+                    const randomX = Math.random() * (maxX - minX) + minX;
+                    const randomY = Math.random() * (maxY - minY) + minY;
+
+                    block.style.left = `${randomX}px`;
+                    block.style.top = `${randomY}px`;
+                    block.setAttribute('aria-label', `Cúmulo de sargazo ${i + 1}`);
+                    this.gameArea.appendChild(block);
+                    this.blocks.push(block);
+                }
+            }
+
+            createWaves() {
+                // Limpiar olas existentes antes de crear nuevas (si es un reinicio)
+                this.gameArea.querySelectorAll('.wave').forEach(wave => wave.remove());
+
+                for (let i = 0; i < GAME_CONFIG.WAVE_COUNT; i++) {
+                    const wave = document.createElement('div');
+                    wave.className = 'wave';
+                    // Posicionar las olas con un pequeño desfase para variar la animación
+                    wave.style.animationDelay = `${i * 0.5}s`;
+                    this.gameArea.appendChild(wave);
+                }
+            }
+
+            handleKeyDown(e) {
+                this.keys[e.key.toLowerCase()] = true;
+            }
+
+            handleKeyUp(e) {
+                this.keys[e.key.toLowerCase()] = false;
+            }
+
+            addEventListeners() {
+                window.addEventListener('keydown', this.boundHandleKeyDown);
+                window.addEventListener('keyup', this.boundHandleKeyUp);
+            }
+
+            removeEventListeners() {
+                window.removeEventListener('keydown', this.boundHandleKeyDown);
+                window.removeEventListener('keyup', this.boundHandleKeyUp);
+            }
+
+            gameLoop() {
+                let dx = 0;
+                let dy = 0;
+
+                if (this.keys['arrowup'] || this.keys['w']) dy = -GAME_CONFIG.PLAYER_SPEED;
+                if (this.keys['arrowdown'] || this.keys['s']) dy = GAME_CONFIG.PLAYER_SPEED;
+                if (this.keys['arrowleft'] || this.keys['a']) dx = -GAME_CONFIG.PLAYER_SPEED;
+                if (this.keys['arrowright'] || this.keys['d']) dx = GAME_CONFIG.PLAYER_SPEED;
+
+                if (dx !== 0 || dy !== 0) {
+                    this.movePlayer(dx, dy);
+                    this.checkCollisions(); // Check collisions after player moves
+                    this.player.classList.add('player-walking'); // Añadir clase de animación al caminar
+                } else {
+                    this.player.classList.remove('player-walking'); // Remover clase si no se mueve
+                }
+
+                // Continuar el bucle si no se han recolectado todos los bloques
+                if (this.blocksCollected < GAME_CONFIG.MAX_BLOCKS_LEVEL1) {
+                    this.animationFrameId = requestAnimationFrame(this.boundGameLoop);
+                }
+            }
+
+            movePlayer(dx, dy) {
+                const playerWidth = this.player.clientWidth;
+                const playerHeight = this.player.clientHeight;
+                const gameAreaWidth = this.gameArea.clientWidth;
+                const gameAreaHeight = this.gameArea.clientHeight;
+
+                // Límites de movimiento en la arena (aproximadamente 50% inferior del área de juego)
+                const minPosY = gameAreaHeight * 0.5; // No puede ir más allá de la mitad (océano)
+                const maxPosY = gameAreaHeight - playerHeight;
+
+                const newPosX = Math.min(Math.max(0, this.posX + dx), gameAreaWidth - playerWidth);
+                const newPosY = Math.min(Math.max(minPosY, this.posY + dy), maxPosY);
+
+                if (newPosX !== this.posX || newPosY !== this.posY) {
+                    this.posX = newPosX;
+                    this.posY = newPosY;
+                    this.player.style.left = `${this.posX}px`;
+                    this.player.style.top = `${this.posY}px`;
+                }
+            }
+
+            checkCollisions() {
+                const playerRect = this.player.getBoundingClientRect();
+                // Iterate backwards to safely remove elements
+                for (let i = this.blocks.length - 1; i >= 0; i--) {
+                    const block = this.blocks[i];
+                    if (block && this.checkIntersection(playerRect, block.getBoundingClientRect())) {
+                        block.classList.add('collected'); // Animación de recolección
+                        
+                        // Increment counter and update display immediately
+                        this.blocksCollected++;
+                        this.updateCounter();
+
+                        // Remove the block from the DOM and nullify its reference after animation
+                        setTimeout(() => { 
+                            if (block.parentNode) { // Check if block is still in DOM before removing
+                                block.remove();
+                            }
+                        }, 300); // Duration of the animation
+                        
+                        this.blocks.splice(i, 1); // Remove block from the array immediately
+
+                        // If all blocks are collected, finish the level
+                        if (this.blocksCollected === GAME_CONFIG.MAX_BLOCKS_LEVEL1) {
+                            gameMessages.textContent = '¡Muy bien! Has recolectado todo el sargazo. Avanzando al siguiente nivel...';
+                            this.finishLevel();
+                            return; // Exit the loop as level is finished
+                        }
+                    }
+                }
+            }
+
+            // Función de colisión más precisa (usando getBoundingClientRect)
+            checkIntersection(rectA, rectB) {
+                return !(
+                    rectA.right < rectB.left ||
+                    rectA.left > rectB.right ||
+                    rectA.bottom < rectB.top ||
+                    rectA.top > rectB.bottom
+                );
+            }
+
+            updateCounter() {
+                gameCounter.textContent = `Cúmulos recolectados: ${this.blocksCollected} / ${GAME_CONFIG.MAX_BLOCKS_LEVEL1}`;
+            }
+
+            finishLevel() {
+                cancelAnimationFrame(this.animationFrameId); // Detener el bucle de juego
+                this.removeEventListeners(); // Remover listeners para evitar conflictos
+                this.player.classList.remove('player-walking'); // Asegurarse de que la animación pare
+                setTimeout(startLevel2, GAME_CONFIG.LEVEL_TRANSITION_DELAY);
+            }
+        }
+
+        /**
+         * Inicia el Nivel 1.
+         */
+        function startLevel1() {
+            const level1 = new Level1Game();
+            level1.init();
+        }
+
+        /**
+         * Clase para manejar la lógica del Nivel 2 (procesar sargazo).
+         */
+        class Level2Game {
+            constructor() {
+                this.draggedBlocksCount = 0;
+                this.sargazoBlocksForProcessing = null;
+                this.machine = null;
+                this.newBlocksContainer = null;
+            }
+
+            init() {
+                showLevelInfo(1);
+                gameContainer.innerHTML = `
+                    <p>Arrastra los cúmulos de sargazo (🌿) hacia la máquina compresora para transformarlos en bloques de sargablock (🧱). También puedes presionar <b>Enter</b> o <b>Espacio</b> para seleccionar un bloque y luego navegar con <b>Tab</b> a la máquina y presionar <b>Enter</b> o <b>Espacio</b> para soltarlo.</p>
+                    <div id="level2-elements-container">
+                        <div id="${ELEMENTS.SARGazo_BLOCKS_FOR_PROCESSING_LVL2}" aria-label="Área de cúmulos de sargazo para procesar"></div>
+                        <div id="${ELEMENTS.MACHINE_LVL2}" tabindex="0" aria-label="Máquina compresora de sargazo. Arrastra bloques aquí.">
+                            Máquina Compresora
+                        </div>
+                    </div>
+                    <div id="${ELEMENTS.NEW_BLOCKS_CONTAINER_LVL2}" aria-label="Contenedor de bloques de sargablock procesados">
+                        <p>Sargablocks procesados:</p>
+                    </div>
+                `;
+
+                this.sargazoBlocksForProcessing = document.getElementById(ELEMENTS.SARGazo_BLOCKS_FOR_PROCESSING_LVL2);
+                this.machine = document.getElementById(ELEMENTS.MACHINE_LVL2);
+                this.newBlocksContainer = document.getElementById(ELEMENTS.NEW_BLOCKS_CONTAINER_LVL2);
+                
+                this.draggedBlocksCount = 0; // Reset counter for Level 2
+
+                this.createDraggableBlocks();
+                this.addEventListeners();
+                this.updateCounter();
+
+                // Initial focus for accessibility
+                this.sargazoBlocksForProcessing.querySelector('.sargablock-draggable')?.focus();
+            }
+
+            createDraggableBlocks() {
+                for (let i = 0; i < GAME_CONFIG.MAX_BLOCKS_LEVEL2; i++) {
+                    const block = document.createElement('div');
+                    block.className = 'sargablock-draggable';
+                    block.draggable = true;
+                    block.tabIndex = 0; // Make it focusable
+                    block.id = `sargazo-block-${i}`; // Unique ID for drag and drop
+                    block.setAttribute('aria-label', `Cúmulo de sargazo sin procesar ${i + 1}`);
+
+                    block.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', e.target.id);
+                        e.dataTransfer.effectAllowed = 'move';
+                        e.target.classList.add('dragging');
+                    });
+
+                    block.addEventListener('dragend', (e) => {
+                        e.target.classList.remove('dragging');
+                    });
+
+                    // Accessibility: Keyboard pick up
+                    block.addEventListener('keydown', (e) => {
+                        if ((e.key === 'Enter' || e.key === ' ')) {
+                            e.preventDefault();
+                            currentDraggingBlockLevel2 = e.target;
+                            currentDraggingBlockLevel2.classList.add('dragging');
+                            gameMessages.textContent = 'Bloque de sargazo seleccionado. Ahora navega con Tab a la máquina compresora y presiona Enter o Espacio para procesarlo.';
+                            this.machine.focus(); // Move focus to the machine
+                        }
+                    });
+
+                    this.sargazoBlocksForProcessing.appendChild(block);
+                }
+            }
+
+            addEventListeners() {
+                // Drag and drop for machine
+                this.machine.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    this.machine.style.backgroundColor = '#c0e6c0'; // Highlight machine on drag over
+                });
+
+                this.machine.addEventListener('dragleave', () => {
+                    this.machine.style.backgroundColor = ''; // Reset background
+                });
+
+                this.machine.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.machine.style.backgroundColor = ''; // Reset background
+                    const blockId = e.dataTransfer.getData('text/plain');
+                    const droppedBlock = document.getElementById(blockId);
+                    if (droppedBlock && droppedBlock.classList.contains('sargablock-draggable')) {
+                        this.processBlock(droppedBlock);
+                    }
+                });
+
+                // Accessibility: Keyboard drop on machine
+                this.machine.addEventListener('keydown', (e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && currentDraggingBlockLevel2) {
+                        e.preventDefault();
+                        this.processBlock(currentDraggingBlockLevel2);
+                        currentDraggingBlockLevel2 = null; // Clear the dragged block
+                    }
+                });
+            }
+
+            processBlock(block) {
+                if (block.parentElement === this.sargazoBlocksForProcessing) { // Only process if it's from the original area
+                    block.remove(); // Remove the draggable block
+                    this.machine.classList.add('compressing'); // Trigger compression animation
+
+                    setTimeout(() => {
+                        this.machine.classList.remove('compressing');
+                        const processedBlock = document.createElement('div');
+                        processedBlock.className = 'sargablock-processed';
+                        processedBlock.setAttribute('aria-label', 'Sargablock procesado');
+                        this.newBlocksContainer.appendChild(processedBlock);
+                        this.draggedBlocksCount++;
+                        this.updateCounter();
+                        gameMessages.textContent = `¡Sargazo procesado! Llevas ${this.draggedBlocksCount} de ${GAME_CONFIG.MAX_BLOCKS_LEVEL2}.`;
+
+                        if (this.draggedBlocksCount === GAME_CONFIG.MAX_BLOCKS_LEVEL2) {
+                            gameMessages.textContent = '¡Excelente! Has transformado todo el sargazo en sargablocks. Avanzando al siguiente nivel...';
+                            setTimeout(startLevel3, GAME_CONFIG.LEVEL_TRANSITION_DELAY);
+                        }
+                    }, 600); // Wait for compression animation to finish
+                }
+            }
+
+            updateCounter() {
+                gameCounter.textContent = `Sargablocks procesados: ${this.draggedBlocksCount} / ${GAME_CONFIG.MAX_BLOCKS_LEVEL2}`;
+            }
+        }
+        
+        let currentDraggingBlockLevel2 = null; // Global variable for keyboard dragging in Level 2
+
+        /**
+         * Inicia el Nivel 2.
+         */
+        function startLevel2() {
+            const level2 = new Level2Game();
+            level2.init();
+        }
+
+        /**
+         * Clase para manejar la lógica del Nivel 3 (construir la casa).
+         */
+        function startLevel3() {
+            showLevelInfo(2);
+            gameContainer.innerHTML = `
+                <p>Ahora, utiliza los bloques de sargablock (🧱) que has procesado para construir una casita. Arrastra y suelta los bloques en los espacios marcados. También puedes presionar <b>Enter</b> o <b>Espacio</b> para seleccionar un bloque y luego navegar con <b>Tab</b> a un hueco y presionar <b>Enter</b> o <b>Espacio</b> para soltarlo.</p>
+                <div id="${ELEMENTS.BLOCKS_AREA_LVL3}" aria-label="Área para bloques de sargablock disponibles"></div>
+                <div id="${ELEMENTS.HOUSE_LVL3}" aria-label="Área de construcción de la casa con sargablocks"></div>
+            `;
+
+            const blocksArea = document.getElementById(ELEMENTS.BLOCKS_AREA_LVL3);
+            const house = document.getElementById(ELEMENTS.HOUSE_LVL3);
+
+            let blocksPlaced = 0;
+            const totalHoles = 9; // 3x3 grid for the house
+
+            gameCounter.textContent = `Bloques colocados: ${blocksPlaced} / ${totalHoles}`;
+
+            let currentDraggingBlock = null; // Keep track of the block being dragged
+
+            // Re-create the processed blocks from Level 2 to be used in Level 3
+            for (let i = 0; i < totalHoles; i++) { // Create 9 blocks for the 3x3 house
+                const block = document.createElement('div');
+                block.className = 'sargablock-processed';
+                block.draggable = true;
+                block.tabIndex = 0; // Make it focusable
+                block.setAttribute('aria-label', `Sargablock disponible ${i + 1}`);
+                block.id = `draggable-block-${i}`; // Give unique ID for accessibility
+
+                block.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', e.target.id); // Set ID as data
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.target.classList.add('dragging');
+                    currentDraggingBlock = e.target;
+                });
+
+                block.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('dragging');
+                    currentDraggingBlock = null;
+                });
+
+                // Accessibility: Keyboard pick up
+                block.addEventListener('keydown', (e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && !currentDraggingBlock) {
+                        e.preventDefault();
+                        currentDraggingBlock = e.target;
+                        currentDraggingBlock.classList.add('dragging');
+                        gameMessages.textContent = 'Bloque de sargablock seleccionado. Ahora navega con Tab a un hueco en la casa y presiona Enter o Espacio para soltarlo.';
+                        // Optionally, move focus to the first hole
+                        const firstHole = house.querySelector('.hole:not(.filled)');
+                        if (firstHole) firstHole.focus();
+                    }
+                });
+
+                blocksArea.appendChild(block);
+            }
+
+            // Create the holes for the house
+            for (let i = 0; i < totalHoles; i++) {
+                const hole = document.createElement('div');
+                hole.className = 'hole';
+                hole.dataset.index = i; // Store index for identification
+                hole.tabIndex = 0; // Make holes focusable for accessibility
+
+                hole.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    hole.classList.add('drag-over');
+                });
+
+                hole.addEventListener('dragleave', () => {
+                    hole.classList.remove('drag-over');
+                });
+
+                hole.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    hole.classList.remove('drag-over');
+                    const blockId = e.dataTransfer.getData('text/plain');
+                    const droppedBlock = document.getElementById(blockId);
+                    if (droppedBlock && !hole.classList.contains('filled')) {
+                        placeBlock(droppedBlock, hole);
+                    }
+                });
+
+                // Accessibility: Keyboard drop
+                hole.addEventListener('keydown', (e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && currentDraggingBlock && !hole.classList.contains('filled')) {
+                        e.preventDefault();
+                        placeBlock(currentDraggingBlock, hole);
+                    }
+                });
+
+                house.appendChild(hole);
+            }
+
+            function placeBlock(block, targetHole) {
+                // Animate block moving from its current position to the hole
+                const blockRect = block.getBoundingClientRect();
+                const holeRect = targetHole.getBoundingClientRect();
+
+                // Calculate the difference in position relative to the document
+                const deltaX = holeRect.left - blockRect.left;
+                const deltaY = holeRect.top - blockRect.top;
+
+                // Apply initial transform to block
+                block.style.transition = 'none'; // Disable transition for initial positioning
+                block.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                block.style.position = 'absolute'; // Change to absolute for positioning
+                block.style.zIndex = '100'; // Bring to front during animation
+                
+                // Trigger reflow to apply instant position change
+                block.offsetWidth; 
+
+                // Re-enable transition for the smooth move back to normal position
+                block.style.transition = 'transform 0.5s ease-out, opacity 0.3s ease-out';
+                block.style.transform = 'translate(0, 0)'; // Animate back to (0,0) relative to its *new* parent
+
+                // Hide original block and place a new one visually in the hole
+                setTimeout(() => {
+                    block.style.opacity = '0'; // Fade out the original block
+
+                    // Create a new, static block to place inside the hole
+                    const placedVisualBlock = document.createElement('div');
+                    placedVisualBlock.className = 'sargablock-processed';
+                    placedVisualBlock.style.width = '100%'; // Fill the hole
+                    placedVisualBlock.style.height = '100%';
+                    placedVisualBlock.style.position = 'relative'; // Allow it to be positioned inside the hole
+                    placedVisualBlock.style.top = '0';
+                    placedVisualBlock.style.left = '0';
+                    placedVisualBlock.setAttribute('aria-label', 'Sargablock colocado');
+                    
+                    targetHole.innerHTML = ''; // Clear hole content (like the question mark)
+                    targetHole.appendChild(placedVisualBlock);
+                    targetHole.classList.add('filled'); // Mark hole as filled
+                    targetHole.removeAttribute('tabindex'); // Make filled hole not focusable
+
+                    // Remove the original block from the blocksArea (it has faded out)
+                    block.remove(); 
+                    currentDraggingBlock = null;
+
+                    blocksPlaced++;
+                    updateLevel3Counter();
+                    gameMessages.textContent = `¡Bloque colocado! Faltan ${totalHoles - blocksPlaced} bloques.`;
+
+                    if (blocksPlaced === totalHoles) {
+                        gameMessages.textContent = '¡Felicidades! Has construido la casita con sargablocks.';
+                        house.classList.add('completed'); // Add class to show roof animation
+                        setTimeout(showEndScreen, GAME_CONFIG.LEVEL_TRANSITION_DELAY + 1000); // Longer delay for roof animation
+                    }
+                }, 50); // Small delay to allow initial transform to apply before fading/moving
+            }
+
+
+            function updateLevel3Counter() {
+                gameCounter.textContent = `Bloques colocados: ${blocksPlaced} / ${totalHoles}`;
+            }
+
+            // Initial focus for accessibility
+            blocksArea.querySelector('.sargablock-processed')?.focus();
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', showStartScreen);
+
+    </script>
+</body>
 </html>
